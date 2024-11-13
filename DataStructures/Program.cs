@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Globalization;
 
 namespace DataStructures
 {
@@ -18,8 +19,11 @@ namespace DataStructures
                 Console.WriteLine("4. Найти максимальный подмассив 3*3 в матрице.");
                 Console.WriteLine("5. Найти значение выражения Ат+2*В+Ст.");
                 Console.WriteLine("6. Найти все компоненты исходного бинарного файла, которые делятся на m и не делятся на n.");
-                Console.WriteLine("9. Показать все матрицы.");
-                Console.WriteLine("10. Выйти");
+                Console.WriteLine("7. Найти разность максимального и минимального элементов бинарного файла.");
+                Console.WriteLine("8. Найти минимальный элемент файла.");
+                Console.WriteLine("9. Переписать в другой файл строки, начинающиеся с заданного символа.");
+                Console.WriteLine("10. Показать все матрицы.");
+                Console.WriteLine("11. Выйти");
                 Console.Write("Выберите действие: ");
 
                 // Считывание выбора пользователя
@@ -46,10 +50,19 @@ namespace DataStructures
                     case "6":
                         FindInBinaryFile();
                         break;
+                    case "7":
+                        FindDiferenceMaxMinTxt();
+                        break;
+                    case "8":
+                        FindMinElementInTxt();
+                        break;
                     case "9":
-                        ShowAllMatrices();
+                        FindStrings();
                         break;
                     case "10":
+                        ShowAllMatrices();
+                        break;
+                    case "11":
                         Console.WriteLine("Выход...");
                         return;
                     default:
@@ -61,6 +74,102 @@ namespace DataStructures
                 Console.ReadKey();
             }
         }
+
+        //Ввод строк в файл
+        public static void CreateFileTxt(string path)
+        {
+            StreamWriter sw = new StreamWriter(path);
+            string s = "";
+            while (s != "0")
+            {
+                s = Console.ReadLine();
+                sw.WriteLine(s);
+            }
+            sw.Close();
+        }
+
+        //Переписать в другой файл строки, начинающиеся с заданного символа. 
+        public static void FindStrings()
+        {
+            string InputFile = "InputString.txt";
+            string OutputFile = "OutputString.txt";
+            Console.WriteLine("Введите файл");
+            CreateFileTxt(InputFile);
+            var m = ReadString("Введите символ m: ");
+            char zz;
+            try
+            {
+                zz = Convert.ToChar(m);
+            }
+            catch
+            {
+                Console.WriteLine("m Не является символом");
+                throw;
+            }
+            FileWorker.FindStrings(InputFile, OutputFile, zz);
+            PrintTxtFile(OutputFile);
+        }
+
+        //Найти минимальный элемент файла
+        public static void FindMinElementInTxt()
+        {
+            string originalTxt = "Original.txt";
+            Console.WriteLine("Найти минимальный элемент файла:");
+            Console.WriteLine("Рандомный исходный файл:");
+            GenerateRandomData(originalTxt);
+            PrintTxtFile(originalTxt);
+            int min = FileWorker.FindMinValueInFile(originalTxt);
+            Console.WriteLine($"Минимальный элемент: {min}");
+        }
+
+        //Запись рандомных чисел в несколько строк в файл
+        public static void GenerateRandomData(string filePath)
+        {
+            Random rand = new Random();
+            int numberOfLines = rand.Next(1, 11); // Генерация случайного количества строк (от 1 до 10)
+
+            using (StreamWriter writer = new StreamWriter(filePath))
+            {
+                for (int i = 0; i < numberOfLines; i++)
+                {
+                    int numbersInLine = rand.Next(1, 11); // Генерация случайного количества чисел в строке (от 1 до 10)
+                    for (int j = 0; j < numbersInLine; j++)
+                    {
+                        writer.Write(rand.Next(1, 101)); // Записываем случайное целое число от 1 до 100
+                        if (j < numbersInLine - 1) writer.Write(" "); // Добавляем пробел между числами
+                    }
+                    writer.WriteLine(); // Переход на новую строку
+                }
+            }
+        }
+
+        //Найти разность максимального и минимального элементов. 
+        private static void FindDiferenceMaxMinTxt()
+        {
+            string originalFile = "data.txt";
+            int diference;
+            Console.WriteLine("Найти разность максимального и минимального элементов файла.");
+            int num = ReadPositiveInt("Введите количество чисел в исходном файле:");
+            FillFileWithRandomDataTxt(originalFile, num);
+            diference = FileWorker.GetDifferenceMaxMin(originalFile);
+            Console.WriteLine("Исходный файл:");
+            PrintTxtFile(originalFile);
+            Console.WriteLine($"Разница максимального и минимального элемента = {diference}");
+        }
+
+        //Заполнение txt рандомными числами
+        public static void FillFileWithRandomDataTxt(string path, int numNumbers)
+        {
+            Random randomNumber = new Random();
+            using (StreamWriter writer = new StreamWriter(path))
+            {
+                for (int i = 0; i < numNumbers; i++)
+                {
+                    writer.WriteLine(randomNumber.Next(1, 100)); // Случайное число от 1 до 99
+                }
+            }
+        }
+
 
         // Найти все компоненты исходного бинарного файла, которые делятся на m и не делятся на n.
         private static void FindInBinaryFile()
@@ -80,6 +189,29 @@ namespace DataStructures
             Console.WriteLine("Результирующий файл");
             PrintBinFile(newFile);
         }
+
+        //Вывод txt файла
+        private static void PrintTxtFile(string txtFile)
+        {
+            using (var reader = new StreamReader(txtFile))
+            {
+                while (!reader.EndOfStream)
+                {
+                    string line = reader.ReadLine();
+                    // Попытка преобразовать строку в целое число, если это необходимо
+                    if (int.TryParse(line, out int value))
+                    {
+                        Console.WriteLine(value);
+                    }
+                    else
+                    {
+                        // Если строка не является числом, выводим саму строку
+                        Console.WriteLine(line);
+                    }
+                }
+            }
+        }
+
 
         //Вывод бинарного файла
         private static void PrintBinFile(string binFile)
